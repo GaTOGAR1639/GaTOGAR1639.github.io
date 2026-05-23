@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Solar de mi amor por ti </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            height: 100vh;
+            background: linear-gradient(to bottom, #0a0a2a, #1a1a4a, #0a0a2a);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+        }
+
+        /* Contenedor del sistema solar con zoom */
+        .solar-system {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transform-origin: center center;
+            transition: transform 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            width: 100vw;
+            height: 100vh;
+            cursor: default;
+            overflow: hidden;
+        }
+
+        /* Estrellas de fondo animadas */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        
+/* Sol central: solo corazón (sin pelota) */
+.sun {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    background: transparent; /* quitar la "pelota" que había antes */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    transition: transform 0.3s ease;
+    animation: sunRotate 40s linear infinite;
+}
+
+/* Corazón central (forma CSS) */
+.heart {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    transform: rotate(45deg);
+    background: linear-gradient(135deg, #ff6ea3 0%, #ff3d6e 60%);
+    box-shadow: 0 0 30px rgba(255,90,140,0.6), 0 0 80px rgba(255,60,110,0.35);
+    filter: drop-shadow(0 0 20px rgba(255,90,140,0.25));
+    animation: heartPulse 1.8s ease-in-out infinite;
+    border-radius: 6px;
+}
+
+@keyframes sunRotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* crear los dos lóbulos con pseudoelementos */
+.heart:before,
+.heart:after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: inherit;
+    box-shadow: inherit;
+}
+.heart:before { top: -50px; left: 0; }
+.heart:after  { left: 50px; top: 0; }
+
+@keyframes heartPulse {
+    0%   { transform: rotate(45deg) scale(1); }
+    50%  { transform: rotate(45deg) scale(1.12); }
+    100% { transform: rotate(45deg) scale(1); }
+}
+
+.orbiting-name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(0deg) translateX(140px) rotate(0deg);
+    transform-origin: center center;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    animation: orbitName 10s linear infinite;
+    pointer-events: none;
+    z-index: 210;
+}
+
+@keyframes orbitName {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) translateX(140px) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) translateX(140px) rotate(-360deg);
+    }
+}
+
+/* Mini corazones flotando alrededor del sol (estilo similar a los que flotan) */
+.mini-heart {
+    position: absolute;
+    font-size: 16px;
+    line-height: 1;
+    pointer-events: none;
+    opacity: 0;
+    animation: miniFloat 5.5s infinite ease-in-out;
+    text-shadow: 0 0 8px rgba(255,100,150,0.6);
+}
+@keyframes miniFloat {
+    0%   { transform: translate(0,0) scale(0.6); opacity: 0; }
+    20%  { opacity: 1; }
+    60%  { transform: translate(var(--tx, -20px), var(--ty, -80px)) scale(1); opacity: 1; }
+    100% { transform: translate(calc(var(--tx, -20px) * 1.2), calc(var(--ty, -80px) * 1.2)) scale(0.8); opacity: 0; }
+}
+
+
+        /* Órbitas */
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .distant-orbit {
+            border-color: rgba(255, 255, 255, 0.05);
+            filter: blur(0.8px);
+            z-index: 0;
+        }
+
+        .distant-planet {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.12);
+            opacity: 0.85;
+            mix-blend-mode: screen;
+            z-index: 0;
+        }
+
+        .orbit {
+            z-index: 1;
+        }
+
+        .planet {
+            z-index: 2;
+        }
+
+        .zoom-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1500;
+        }
+
+        .zoom-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 105, 180, 0.85);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.35);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .zoom-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255, 105, 180, 1);
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
+        .decorative-planet {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+            opacity: 0.5;
+            filter: blur(1px);
+            pointer-events: none;
+            z-index: 0;
+            animation: drift 30s ease-in-out infinite alternate;
+        }
+
+        .decorative-planet.small {
+            width: 72px;
+            height: 72px;
+        }
+
+        .decorative-planet.medium {
+            width: 96px;
+            height: 96px;
+        }
+
+        .decorative-planet.large {
+            width: 140px;
+            height: 140px;
+        }
+
+        @keyframes drift {
+            from {
+                transform: translate(0, 0) scale(1);
+            }
+            to {
+                transform: translate(18px, -18px) scale(1.03);
+            }
+        }
+
+        .orbit-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            font-size: var(--heart-size);
+            color: var(--heart-color);
+            pointer-events: none;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.75);
+            z-index: 15;
+            opacity: 0.95;
+        }
+
+        .orbit-heart::before {
+            content: '❤';
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .orbit-heart.pulse {
+            animation: orbitHeart var(--orbit-duration, 18s) linear infinite;
+        }
+
+        @keyframes orbitHeart {
+            0% {
+                transform: translate(-50%, -50%) rotate(var(--orbit-angle)) translateX(var(--orbit-distance)) rotate(calc(-1 * var(--orbit-angle))) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) rotate(calc(var(--orbit-angle) + 180deg)) translateX(var(--orbit-distance)) rotate(calc(-1 * var(--orbit-angle) - 180deg)) scale(1.12);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(calc(var(--orbit-angle) + 360deg)) translateX(var(--orbit-distance)) rotate(calc(-1 * var(--orbit-angle) - 360deg)) scale(1);
+            }
+        }
+
+        /* Planetas */
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            transform-origin: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .planet:hover {
+            transform: scale(1.5);
+            z-index: 100;
+        }
+
+        .planet-hover-text {
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 8px;
+            border-radius: 10px;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .planet:hover .planet-hover-text {
+            opacity: 1;
+        }
+
+        /* Frases flotantes */
+        .floating-phrase {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: float 15s infinite linear;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 5;
+            text-align: center;
+            width: 120px;
+            opacity: 0;
+            transition: opacity 1.5s ease, transform 0.5s ease, color 0.3s ease;
+        }
+
+        .floating-phrase.visible {
+            opacity: 1;
+        }
+
+        .floating-phrase.selected {
+            animation: none !important;
+            transform: translate(var(--tx), var(--ty)) rotate(0deg) scale(1.05) !important;
+            color: #ffffff;
+            z-index: 1000;
+        }
+
+        .floating-phrase.not-selected {
+            opacity: 0.5;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Estrellas fugaces con frases */
+        .shooting-star {
+            position: absolute;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0;
+            text-shadow: 0 0 10px currentColor;
+            animation: shootStar 5s linear forwards;
+        }
+
+        @keyframes shootStar {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--star-tx), var(--star-ty)) rotate(var(--star-r));
+                opacity: 0;
+            }
+        }
+
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sun {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .heart {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .heart:before,
+            .heart:after {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .heart:before {
+                top: -30px;
+            }
+            
+            .heart:after {
+                left: -30px;
+            }
+            
+            .floating-phrase {
+                font-size: 12px;
+                width: 100px;
+            }
+
+            .orbiting-name {
+                transform: translate(-50%, -50%) rotate(0deg) translateX(100px) rotate(0deg);
+                font-size: 14px;
+            }
+
+            .zoom-controls {
+                bottom: 10px;
+                right: 10px;
+            }
+
+            .zoom-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+            .zoom-level {
+                bottom: 55px;
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sun {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .heart {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .heart:before,
+            .heart:after {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .heart:before {
+                top: -25px;
+            }
+            
+            .heart:after {
+                left: -25px;
+            }
+            
+            .floating-phrase {
+                font-size: 10px;
+                width: 80px;
+            }
+            
+            .orbiting-name {
+                transform: translate(-50%, -50%) rotate(0deg) translateX(80px) rotate(0deg);
+                font-size: 12px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="solar-system" id="solar-system">
+        <div class="decorative-planet large" style="top: 8%; left: 4%; background: radial-gradient(circle at 30% 30%, #7dc8ff 0%, #20427b 100%); opacity: 0.45;"></div>
+        <div class="decorative-planet medium" style="top: 12%; right: 8%; background: radial-gradient(circle at 25% 25%, #ffd78b 0%, #a9632f 100%); animation-duration: 32s; opacity: 0.42;"></div>
+        <div class="decorative-planet small" style="bottom: 18%; left: 10%; background: radial-gradient(circle at 40% 40%, #c17bff 0%, #421c70 100%); animation-duration: 26s; opacity: 0.38;"></div>
+        <div class="decorative-planet small" style="bottom: 8%; right: 12%; background: radial-gradient(circle at 35% 35%, #86ffcc 0%, #1e5b4f 100%); animation-duration: 28s; opacity: 0.4;"></div>
+
+        <div class="sun">
+            <div class="heart"></div>
+            <div class="orbiting-name">Yosdari</div>
+            <!-- Corazoncitos flotantes alrededor (manteniendo estilo de tu galaxia original) -->
+            <div class="mini-heart" style="left:-50px; top:18px; animation-delay:0s;">❤</div>
+            <div class="mini-heart" style="left:36px; top:-46px; animation-delay:0.6s;">❤</div>
+            <div class="mini-heart" style="left:80px; top:30px; animation-delay:1.2s;">❤</div>
+            <div class="mini-heart" style="left:-10px; top:-78px; animation-delay:1.8s;">❤</div>
+        </div>
+        
+        <div id="orbits-container"></div>
+        <div id="floating-phrases"></div>
+    </div>
+
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoom-in">+</button>
+        <button class="zoom-btn" id="zoom-out">−</button>
+    </div>
+
+    <script>
+        // Arrays con frases románticas
+        const planetHoverPhrases = [
+            "Eres mi todo",
+            "Mi corazón late por ti",
+            "Juntos x siempre",
+            "Eres mi sueño hecho realidad",
+            "Amor infinito",
+            "Eres mi luz",
+            "Mi alma te pertenece",
+            "Contigo la vida es mas bonita"
+        ];
+
+        const floatingPhrases = [
+            "El amor todo lo puede",
+            "Eres mi universo",
+            "Te amo más que ayer",
+            "Nuestro amor es infinito",
+            "Eres mi estrella favorita",
+            "Mi corazón es tuyo",
+            "Juntos somos más",
+            "Eres mi destino",
+            "Amor eterno",
+            "Eres mi razón de ser",
+            "Mi amor por ti crece cada día",
+            "Eres mi paraíso",
+            "Cada momento contigo es especial",
+            "Eres la mejor parte de mi vida",
+            "Tu amor ilumina mi existencia",
+            "Eres mi pensamiento favorito",
+            "Amo tu sonrisa",
+            "Eres mi persona favorita",
+            "Contigo quiero envejecer",
+            "Eres mi felicidad",
+            "Tu amor es mi fuerza",
+            "Eres mi refugio",
+            "Amo cada parte de ti",
+            "Eres mi complemento perfecto",
+            "Mi amor por ti es eterno"
+        ];
+
+        const planetClickPhrases = [
+            "Desde que llegaste a mi vida, todo tiene sentido. Eres la razón por la que mi corazón late con fuerza cada mañana y por la que mis sueños están llenos de felicidad.",
+            "A tu lado descubrí que el amor verdadero existe. Eres mi complemento perfecto, la personificación de todo lo bueno que podía imaginar.",
+            "Si tuviera que elegir entre respirar y amarte, usaría mi último aliento para decirte que te amo. Eres lo más importante en mi vida.",
+            "Nuestro amor es como el universo: infinito, misterioso y lleno de maravillas por descubrir. Cada día a tu lado es una nueva aventura.",
+            "Eres la melodía que alegra mi corazón, la poesía que da sentido a mis días, la pintura que colorea mi mundo. Sin ti, todo sería gris.",
+            "Amo cada parte de ti: tu sonrisa que ilumina mi día, tu voz que calma mi alma, tu mirada que me hace sentir el ser más afortunado del mundo.",
+            "En la inmensidad del cosmos, entre miles de millones de personas, encontré a mi alma gemela. El destino nos unió y el amor nos mantendrá juntos por siempre.",
+            "Prometo amarte en cada vida, en cada universo, en cada realidad posible. Eres mi eternidad y mi hogar."
+        ];
+
+        // Frases especiales para estrellas fugaces
+        const shootingStarPhrases = [
+            "¡Eres increíble!",
+            "Mi amor por ti brilla",
+            "Eres mi deseo cumplido",
+            "Eres mi constelación favorita",
+            "Juntos somos magia",
+            "Eres mi sueño hecho realidad",
+            "Nuestro amor es imposible de apagar",
+            "Eres la galaxia a la que quiero pertenecer",
+            "Mi corazón orbita alrededor de ti",
+            "Eres mi supernova",
+            "Eres mi estrella más brillante",
+            "En tus ojos encuentro mi universo",
+        ];
+
+        // Colores para estrellas fugaces
+        const starColors = [
+            "#ff5e7d", "#ff9077", "#ffcc66", "#5ebdff", "#9d7cff", 
+            "#ff6b6b", "#ff8e8e", "#6bff8e", "#8e6bff", "#ff6bff"
+        ];
+
+        // Configuración de planetas
+        const planets = [
+            { name: "Amor", size: 16, color: "#ff4d88", orbitRadius: 150, speed: 40, phrase: planetHoverPhrases[0] },
+            { name: "Pasión", size: 18, color: "#ff3366", orbitRadius: 220, speed: 35, phrase: planetHoverPhrases[1] },
+            { name: "Ternura", size: 14, color: "#ff99cc", orbitRadius: 290, speed: 30, phrase: planetHoverPhrases[2] },
+            { name: "Compromiso", size: 20, color: "#cc66ff", orbitRadius: 360, speed: 25, phrase: planetHoverPhrases[3] },
+            { name: "Complicidad", size: 15, color: "#9966ff", orbitRadius: 430, speed: 20, phrase: planetHoverPhrases[4] },
+            { name: "Respeto", size: 17, color: "#6699ff", orbitRadius: 500, speed: 15, phrase: planetHoverPhrases[5] },
+            { name: "Confianza", size: 19, color: "#66ccff", orbitRadius: 570, speed: 10, phrase: planetHoverPhrases[6] },
+            { name: "Eternidad", size: 22, color: "#ffcc66", orbitRadius: 640, speed: 5, phrase: planetHoverPhrases[7] }
+        ];
+
+        const distantPlanets = [
+            { name: "Luna", size: 8, color: "#c8ebff", orbitRadius: 760, speed: 70 },
+            { name: "Astro", size: 10, color: "#ffdbe4", orbitRadius: 820, speed: 85 },
+            { name: "Nube", size: 7, color: "#d6c8ff", orbitRadius: 900, speed: 100 },
+            { name: "Bruma", size: 9, color: "#c1ffe8", orbitRadius: 980, speed: 95 }
+        ];
+
+        const orbitHeartPalettes = [
+            [
+                { size: 14, color: '#ff92c2' },
+                { size: 10, color: '#ff5e96' },
+                { size: 8, color: '#ffd4eb' }
+            ],
+            [
+                { size: 13, color: '#ff7c6b' },
+                { size: 11, color: '#ffc680' },
+                { size: 9, color: '#ffdfad' }
+            ],
+            [
+                { size: 16, color: '#c58fff' },
+                { size: 12, color: '#d9a8ff' },
+                { size: 8, color: '#f0e0ff' }
+            ],
+            [
+                { size: 14, color: '#6bb8ff' },
+                { size: 10, color: '#8fd7ff' },
+                { size: 8, color: '#ccecff' }
+            ],
+            [
+                { size: 13, color: '#ff8bdc' },
+                { size: 11, color: '#ffb4f0' },
+                { size: 9, color: '#ffd8fb' }
+            ],
+            [
+                { size: 15, color: '#ffcb60' },
+                { size: 12, color: '#ffe29f' },
+                { size: 9, color: '#fff3cc' }
+            ],
+            [
+                { size: 10, color: '#7ce3d6' },
+                { size: 12, color: '#9ef3e8' },
+                { size: 8, color: '#d8fff7' }
+            ],
+            [
+                { size: 17, color: '#ffdd7f' },
+                { size: 13, color: '#ffe7ac' },
+                { size: 10, color: '#fff3cf' }
+            ]
+        ];
+
+        // Variables de estado
+        let currentZoom = 1;
+        let floatingPhrasesElements = [];
+        let visiblePhrases = 15;
+
+        // Crear estrellas de fondo
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 200;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random() * 3;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                star.style.animationDuration = `${Math.random() * 5 + 3}s`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Crear estrellas fugaces con frases
+        function createShootingStars() {
+            setInterval(() => {
+                // Crear una nueva estrella fugaz cada 3-8 segundos
+                const delay = Math.random() * 5000 + 3000;
+                setTimeout(createShootingStar, delay);
+            }, 1000);
+        }
+
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.classList.add('shooting-star');
+            
+            // Seleccionar frase y color aleatorio
+            const randomPhrase = shootingStarPhrases[Math.floor(Math.random() * shootingStarPhrases.length)];
+            const randomColor = starColors[Math.floor(Math.random() * starColors.length)];
+            
+            star.textContent = randomPhrase;
+            star.style.color = randomColor;
+            
+            // Posición inicial aleatoria
+            const startX = Math.random() * 100;
+            const startY = Math.random() * 100;
+            
+            // Dirección y distancia aleatoria
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 100 + Math.random() * 100;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            const rotation = Math.random() * 360;
+            
+            star.style.left = `${startX}%`;
+            star.style.top = `${startY}%`;
+            star.style.setProperty('--star-tx', `${tx}vw`);
+            star.style.setProperty('--star-ty', `${ty}vh`);
+            star.style.setProperty('--star-r', `${rotation}deg`);
+            
+            document.body.appendChild(star);
+            
+            // Eliminar la estrella después de la animación
+            setTimeout(() => {
+                if (star.parentNode) {
+                    star.parentNode.removeChild(star);
+                }
+            }, 5000);
+        }
+
+        // Crear órbitas y planetas
+        function createSolarSystem() {
+            const orbitsContainer = document.getElementById('orbits-container');
+            
+            planets.forEach((planet, index) => {
+                // Crear órbita
+                const orbit = document.createElement('div');
+                orbit.classList.add('orbit');
+                orbit.style.width = `${planet.orbitRadius * 2}px`;
+                orbit.style.height = `${planet.orbitRadius * 2}px`;
+                orbitsContainer.appendChild(orbit);
+
+                // Crear corazones en la órbita
+                const palette = orbitHeartPalettes[index % orbitHeartPalettes.length];
+                const baseAngles = [25, 145, 265];
+                palette.forEach((heartStyle, heartIndex) => {
+                    const orbitHeart = document.createElement('div');
+                    orbitHeart.classList.add('orbit-heart', 'pulse');
+                    orbitHeart.style.setProperty('--heart-size', `${heartStyle.size}px`);
+                    orbitHeart.style.setProperty('--heart-color', heartStyle.color);
+                    const angle = baseAngles[heartIndex] + (Math.random() * 40 - 20);
+                    const orbitDistance = planet.orbitRadius - (heartStyle.size / 2) - 6;
+                    const duration = (Math.random() * 8) + 12;
+                    orbitHeart.style.setProperty('--orbit-angle', `${angle}deg`);
+                    orbitHeart.style.setProperty('--orbit-distance', `${orbitDistance}px`);
+                    orbitHeart.style.setProperty('--orbit-duration', `${duration.toFixed(1)}s`);
+                    orbitHeart.style.animationDirection = Math.random() < 0.5 ? 'normal' : 'reverse';
+                    orbitHeart.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateX(${orbitDistance}px) rotate(-${angle}deg)`;
+                    orbit.appendChild(orbitHeart);
+                });
+                
+                // Crear planeta
+                const planetEl = document.createElement('div');
+                planetEl.classList.add('planet');
+                planetEl.style.width = `${planet.size}px`;
+                planetEl.style.height = `${planet.size}px`;
+                planetEl.style.backgroundColor = planet.color;
+                planetEl.style.animation = `orbit ${planet.speed}s linear infinite`;
+                
+                // Texto al hacer hover
+                const hoverText = document.createElement('div');
+                hoverText.classList.add('planet-hover-text');
+                hoverText.textContent = planet.phrase;
+                planetEl.appendChild(hoverText);
+                
+                orbitsContainer.appendChild(planetEl);
+                
+                // Ajustar la posición inicial del planeta
+                const angle = (Math.random() * 360);
+                planetEl.style.transform = `rotate(${angle}deg) translate(${planet.orbitRadius}px) rotate(-${angle}deg)`;
+            });
+
+            distantPlanets.forEach((planet, index) => {
+                const orbit = document.createElement('div');
+                orbit.classList.add('orbit', 'distant-orbit');
+                orbit.style.width = `${planet.orbitRadius * 2}px`;
+                orbit.style.height = `${planet.orbitRadius * 2}px`;
+                orbitsContainer.appendChild(orbit);
+
+                const planetEl = document.createElement('div');
+                planetEl.classList.add('planet', 'distant-planet');
+                planetEl.style.width = `${planet.size}px`;
+                planetEl.style.height = `${planet.size}px`;
+                planetEl.style.backgroundColor = planet.color;
+                planetEl.style.animation = `orbit ${planet.speed}s linear infinite`;
+                planetEl.style.opacity = '0.85';
+                planetEl.style.boxShadow = `0 0 18px ${planet.color}50`;
+                planetEl.style.setProperty('--orbit-radius', `${planet.orbitRadius}px`);
+
+                orbitsContainer.appendChild(planetEl);
+
+                const startAngle = (Math.random() * 360);
+                planetEl.style.transform = `rotate(${startAngle}deg) translate(${planet.orbitRadius}px) rotate(-${startAngle}deg)`;
+            });
+            
+            // Añadir animación de órbita
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes orbit {
+                    0% { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
+                    100% { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Aplicar radio de órbita a cada planeta normal
+            document.querySelectorAll('.planet').forEach((planet, index) => {
+                if (!planet.classList.contains('distant-planet')) {
+                    planet.style.setProperty('--orbit-radius', `${planets[index].orbitRadius}px`);
+                }
+            });
+        }
+
+        // Crear frases flotantes
+        function createFloatingPhrases() {
+            const container = document.getElementById('floating-phrases');
+            
+            floatingPhrases.forEach((phraseText, index) => {
+                const phrase = document.createElement('div');
+                phrase.classList.add('floating-phrase');
+                phrase.textContent = phraseText;
+                
+                // Posición y animación aleatorias
+                const startX = Math.random() * 100;
+                const startY = Math.random() * 100;
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = (Math.random() - 0.5) * 200;
+                
+                phrase.style.left = `${startX}%`;
+                phrase.style.top = `${startY}%`;
+                phrase.style.setProperty('--tx', `${tx}vw`);
+                phrase.style.setProperty('--ty', `${ty}vh`);
+                phrase.style.setProperty('--initial-left', `${startX}%`);
+                phrase.style.setProperty('--initial-top', `${startY}%`);
+                
+                phrase.style.animationDuration = `${Math.random() * 10 + 15}s`;
+                phrase.style.animationDelay = `${Math.random() * 5}s`;
+                
+                // Solo hacer visibles algunas frases inicialmente
+                if (index < visiblePhrases) {
+                    phrase.classList.add('visible');
+                }
+
+                container.appendChild(phrase);
+                floatingPhrasesElements.push(phrase);
+            });
+        }
+
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            createSolarSystem();
+            createFloatingPhrases();
+            createShootingStars();
+            setupZoomControls();
+            applyZoom();
+        });
+
+        function applyZoom() {
+            const solarSystem = document.getElementById('solar-system');
+            solarSystem.style.transform = `translate(-50%, -50%) scale(${currentZoom})`;
+        }
+
+        function setupZoomControls() {
+            const zoomInBtn = document.getElementById('zoom-in');
+            const zoomOutBtn = document.getElementById('zoom-out');
+
+            zoomInBtn.addEventListener('click', () => {
+                currentZoom = Math.min(1.6, currentZoom + 0.1);
+                applyZoom();
+            });
+
+            zoomOutBtn.addEventListener('click', () => {
+                currentZoom = Math.max(0.4, currentZoom - 0.1);
+                applyZoom();
+            });
+        }
+    </script>
+</body>
+</html>
