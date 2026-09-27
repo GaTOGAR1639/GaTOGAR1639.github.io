@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Solar de mi amor por ti </title>
+    <title>Te amo Yosdari linda </title>
     <style>
         * {
             margin: 0;
@@ -189,6 +189,28 @@
 
         .planet {
             z-index: 2;
+        }
+
+        .music-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.18);
+            z-index: 1500;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .music-toggle:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .zoom-controls {
@@ -526,10 +548,16 @@
         <div id="floating-phrases"></div>
     </div>
 
+    <button class="music-toggle" id="music-toggle" aria-label="Activar música">♫</button>
+
     <div class="zoom-controls">
         <button class="zoom-btn" id="zoom-in">+</button>
         <button class="zoom-btn" id="zoom-out">−</button>
     </div>
+
+    <audio id="cancion-fondo" loop preload="auto">
+        <source src="EXTREMODURO. SI TE VAS.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
         // Arrays con frases románticas
@@ -889,6 +917,30 @@
         function setupZoomControls() {
             const zoomInBtn = document.getElementById('zoom-in');
             const zoomOutBtn = document.getElementById('zoom-out');
+            const musicToggle = document.getElementById('music-toggle');
+            const audio = document.getElementById('cancion-fondo');
+
+            const toggleMusic = () => {
+                if (!audio) return;
+                if (audio.paused) {
+                    audio.volume = 0.45;
+                    audio.play().catch(() => {});
+                    musicToggle.textContent = '♫';
+                } else {
+                    audio.pause();
+                    musicToggle.textContent = '🔇';
+                }
+            };
+
+            musicToggle.addEventListener('click', toggleMusic);
+
+            document.addEventListener('click', () => {
+                if (audio && audio.paused) {
+                    audio.volume = 0.45;
+                    audio.play().catch(() => {});
+                    musicToggle.textContent = '♫';
+                }
+            }, { once: true });
 
             zoomInBtn.addEventListener('click', () => {
                 currentZoom = Math.min(1.6, currentZoom + 0.1);
